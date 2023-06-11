@@ -17,6 +17,12 @@ namespace CodingWiki_DataAccess.Data
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<BookDetail> BookDetails { get; set; }
 
+        //Fluent tbles
+        public DbSet<Fluent_Book> Fluent_Books { get; set; }
+        public DbSet<Fluent_BookDetail> Fluent_BookDetails { get; set; }
+        public DbSet<Fluent_Author> Fluent_Author { get; set; }
+        public DbSet<Fluent_Publisher> Fluent_Publishers { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlServer(@"Server=.;Database=CodingWiki;TrustServerCertificate=True;Trusted_Connection=True;");
@@ -25,6 +31,24 @@ namespace CodingWiki_DataAccess.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Authors
+            //rename tbl and col name
+            modelBuilder.Entity<Fluent_Author>().ToTable("Fluent_Authors");
+            modelBuilder.Entity<Fluent_Author>().Property(u => u.BirthDate).HasColumnName("DOB");
+
+
+            modelBuilder.Entity<Fluent_Author>().HasKey(u => u.Author_Id);
+            modelBuilder.Entity<Fluent_Author>().Property(u=>u.FirstName).IsRequired();
+            modelBuilder.Entity<Fluent_Author>().Property(u => u.FirstName).HasMaxLength(50);
+            modelBuilder.Entity<Fluent_Author>().Property(u => u.FirstName).IsRequired();
+            modelBuilder.Entity<Fluent_Author>().Ignore(u => u.FullName);
+
+            modelBuilder.Entity<Fluent_Book>().HasOne(u => u.BookDetail).WithOne(u => u.Book).HasForeignKey<Fluent_BookDetail>(u => u.BookId);
+            modelBuilder.Entity<Fluent_Book>().HasOne(u => u.Publisher).WithMany(u => u.Books).HasForeignKey(u => u.Publisher_Id);
+
+
+
+
             modelBuilder.Entity<Book>().Property(u => u.Price).HasPrecision(10,5);
             modelBuilder.Entity<BookAuthorMap>().HasKey(u => new {u.Author_Id,u.BookId});
             var bookList = new Book[]
